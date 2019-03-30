@@ -1,0 +1,123 @@
+
+# ML Suite Release Notes
+
+## Framework Support and Layers 
+- Caffe: 1.0.0
+- Tensorflow: 1.8
+ - Darknet (Specifically for YOLO)
+- Supported Layers
+  - Convolution 
+  - ReLU  -  supported following Convolution / Eltwise Layers
+  - Pooling
+  - Deconvolution (Only compiler support, runtime is pending)
+  - Concat
+  - Eltwise (sum)
+  - BatchNorm
+  - Scale
+  - Slice 
+  - Layers supported in CPU:
+    - InnerProduct
+    - Softmax
+    - Region/NMS
+ 
+## Release 1.3
+
+### New Features
+- Updated to support 2018.2 SDx and XRT
+- New Platforms Supported: 
+  - VCU1525, Alveo U200, Alveo U250 
+- Added Support for xDNNv3 - Delivers higher throughput at lower latency
+- Auto-detect Platform/DSA
+- Both v2 and v3 libxfdnn.so runtime libraries automatically built with `make`
+- Auto-detect xclbin version and correctly load corresponding libxfdnn.so runtime library for XDNN_v2 or XDNN_v3
+- Auto-detect batch size based on # PEs (batch size = # PEs, except for xDNNv2 8-bit where it will be double)
+- XDNN_v3 max throughput end-to-end demo for Googlenet_v1 and Resnet50 
+  - Customers can use this to enjoy command-line performance that matches FPGA kernel time 
+- pytest suite to exercise all documented examples/apps
+- REST server updated to use new XFDNN API; handles concurrent requests with exec_async
+- Perpetual Demo now supports xDNNv3 and upto 8 FPGA cards
+- Uptdated xfDNN APIs to allow higher throughput streaming on xDNNv3, and improve ease of use
+- xfDNN Compiler enhanced to report better memory utilization and estimate throughput/latency of network
+
+
+### Bug fixes
+- batch_classify example renamed to streaming_classify
+- Improvements to Tensorflow Compiler/Quantizer
+- Improved accuracy for Quantized Resnet101 models 
+
+
+### Known Issues
+ - examples/classification/test_classify_async_multinet.py - incorrectly reloads network schedule in some circumstances
+ - XDNNv3 fpga binary (overlay_4.xclbin) is not included for the AWS platform. Stay tuned.
+ - xfDNN runtime API documentation is out of date. Please use the examples & notebooks for reference
+  
+## Release 1.2
+
+### New Features
+- Added support for 2018.2 XRT, and Alveo-U200
+- New Jupyter Notebook available:
+  - Image Classification with TensorFlow 
+- Benchmark utility script added (GoogLeNet, ResNet50)
+- Enhanced Documentation with API markdown guides
+- Added Power 9 Support
+
+
+### Bug fixes
+- Improved layer merging optimizations
+- xdnn.computeFC optimized for 2x speedup w/ vectorized numpy implementation
+- xdnn.computeSoftmax optimized for 10x speedup w/ vectorized numpy implementation
+  - In the future we will move to C++ implementation
+- Fixed bug where image dimensions mod 32 would cause invalid preprocessing, and zero detections
+
+### Known Issues
+ - examples/classification/test_classify_async_multinet.py - incorrectly reloads network schedule in some circumstances
+
+## Release 1.1
+
+### New Features
+- Added Jupyter Notebook Support 
+- New Jupyter Notebooks available:
+  - Image Classification with Caffe 
+  - Using the xfDNN Compiler w/ a Caffe Model
+  - Using the xfDNN Quantizer w/ a Caffe Model
+  - Object Detection w/ YOLOv2 + Darknet to Caffe conversion 
+- Image Classification Googlenet Demo for VCU1525 
+- Enhanced Documentation with ML Suite Overview, Overlay Selector Guide and  FAQ
+- Introducing Nimbix Support 
+- Updated SDx DSA support to `xilinx_vcu1525_dynamic_5_1` for VCU1525 and Nimbix 
+
+### Bug fixes
+- AWS overlay names have been updated, removing 'aws' prefix
+- General Enhancements and Bug fixes for xfDNN Compiler/Quantizer
+- Batch Nom layers implementation corrected from Darknet
+- Default file permission fixed
+- Root dir issues involving "ml-suite" resolved
+- xdnn.execute api no longer needs images/batch argument
+- Quantizer updated to allow for custom file names for output files
+- xdnn_io updated to return 'none' if there are not FC layers in network
+
+### Known Issues
+* Batch Normalization layers not supported by the quantizer
+* Local Response Normalization layers not supported 
+* Hardware solution for average pool causes some accuracy loss, to be fixed in a future release
+* Standard ReLU is the only supported non-linearity (Leaky ReLU Networks must be modified/retrained
+
+## Release 1.0
+
+This release is the first push of Xilinx's ML Suite to Github.  
+Releasing to github will enable rapid release cycles, a smaller release footprint, and open source contribution.
+
+### New Features
+* FPGA Accelerated Image Classification, support for many networks
+* FPGA Accelerated Object Detection, YOLOv2 support
+* Python API for deploying inference to FPGA
+* Precompiled xfDNN Library
+* Updated Support for xDNNv2
+
+### Known Issues
+* Batch Normalization layers not supported by the quantizer
+* Local Response Normalization layers not supported 
+* Hardware solution for average pool causes some accuracy loss, to be fixed in a future release
+* Standard ReLU is the only supported non-linearity (Leaky ReLU Networks must be modified/retrained)
+
+
