@@ -23,8 +23,8 @@ def load_bert_model():
 
 
 def calc_entailment_prob(sentence_1: str, sentence_2: str, model=load_bert_model()) -> (float, float):
-    tokens_sen_1 = _tokenizer.tokenize(sentence_1)
-    tokens_sen_2 = _tokenizer.tokenize(sentence_2)
+    tokens_sen_1 = _tokenizer.tokenize(sentence_1)[:30]
+    tokens_sen_2 = _tokenizer.tokenize(sentence_2)[:30]
 
     tokens = ['[CLS]'] + tokens_sen_1 + ['[SEP]'] + tokens_sen_2 + ['[SEP]']
     # print(tokens)
