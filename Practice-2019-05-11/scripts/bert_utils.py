@@ -3,7 +3,8 @@ import numpy as np
 from keras_bert import load_trained_model_from_checkpoint
 from scripts.tokenization import FullTokenizer
 
-_folder = "d:\\nlp\\multi_cased_L-12_H-768_A-12\\"
+#_folder = "d:\\nlp\\multi_cased_L-12_H-768_A-12\\"
+_folder = "d:\\nlp\\cased_L-12_H-768_A-12\\"
 _config_path = _folder + 'bert_config.json'
 _checkpoint_path = _folder + 'bert_model.ckpt'
 _vocab_path = _folder + 'vocab.txt'
@@ -11,11 +12,13 @@ _vocab_path = _folder + 'vocab.txt'
 _tokenizer = FullTokenizer(vocab_file=_vocab_path, do_lower_case=False)
 _model = None
 
+max_seq_len = 64  # 512
+
 
 def load_bert_model():
     global _model
     if _model is None:
-        _model = load_trained_model_from_checkpoint(_config_path, _checkpoint_path, training=True)
+        _model = load_trained_model_from_checkpoint(_config_path, _checkpoint_path, training=True, seq_len=max_seq_len)
     return _model
 
 
@@ -29,13 +32,13 @@ def calc_entailment_prob(sentence_1: str, sentence_2: str, model=load_bert_model
     # преобразуем строковые токены в числовые индексы:
     token_input = _tokenizer.convert_tokens_to_ids(tokens)
     # удлиняем до 512
-    token_input = token_input + [0] * (512 - len(token_input))
+    token_input = token_input + [0] * (max_seq_len - len(token_input))
 
     # маска в этом режиме все 0
-    mask_input = [0] * 512
+    mask_input = [0] * max_seq_len
 
     # в маске предложений под второй фразой, включая конечный SEP, надо поставить 1, а все остальное заполнить 0
-    seg_input = [0] * 512
+    seg_input = [0] * max_seq_len
     len_1 = len(tokens_sen_1) + 2  # длина первой фразы, +2 - включая начальный CLS и разделитель SEP
     for i in range(len(tokens_sen_2) + 1):  # +1, т.к. включая последний SEP
         seg_input[len_1 + i] = 1  # маскируем вторую фразу, включая последний SEP, единицами
