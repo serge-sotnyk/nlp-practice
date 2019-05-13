@@ -4,6 +4,7 @@ from scripts.baseline_logisticregression import readInData
 from typing import NamedTuple, List
 #from scripts.bert_utils import calc_entailment_prob
 from sklearn.ensemble import RandomForestClassifier
+from  sklearn.linear_model import LogisticRegression
 from bpemb import BPEmb
 
 
@@ -24,13 +25,31 @@ def load_data(fn: str)->(List[RawInput],List[bool]):
     return [RawInput(r[2], r[2]) for r in data], [r[1] for r in data]
 
 
-def featurize(x_raw: List[RawInput])->List[List[float]]:
+def featurize(x_raw: List[RawInput]) -> List[List[float]]:
     res = []
     for r in x_raw:
-        p = calc_entailment_prob(r.twit0, r.twit1)
-        pb = calc_entailment_prob(r.twit1, r.twit0)
-        res.append([p[0], p[1], pb[0], pb[1]])
+        res.append([len(r.twit0)/len(r.twit1), len(r.twit0)/100, len(r.twit1)/100])
     return res
+
+
+def report(y_true, y_pred):
+    y_true_cleaned, y_pred_cleaned = [], []
+    for t, p in zip(y_true, y_pred):
+        if t is not None:
+            y_true_cleaned.append(t)
+            y_pred_cleaned.append(p)
+    print(classification_report(y_true_cleaned, y_pred_cleaned))
+
+
+class FakeClassifier():
+    def fit(self, x, y):
+        return self
+
+    def predict(self, x):
+        res = []
+        for i, _ in enumerate(x):
+            res.append(i % 2 == 0)
+        return res
 
 
 def main():
@@ -45,11 +64,13 @@ def main():
     print("Done!")
 
     print("Start learning classifier...")
-    clf = RandomForestClassifier(n_estimators=100, random_state=1974, verbose=True)
+    #clf = RandomForestClassifier(n_estimators=100, random_state=1974, verbose=True)
+    clf = LogisticRegression(random_state=1974, verbose=True, solver='saga', max_iter=2000, class_weight='balanced')
+    #clf = FakeClassifier()
     print("Done!")
-    clf.fit(x_test_features, y_train)
+    clf.fit(x_train_features, y_train)
     y_pred = clf.predict(x_test_features)
-    print(classification_report(y_test, y_pred))
+    report(y_test, y_pred)
 
     #model = train_model(x_dev_raw, y_train)
 
